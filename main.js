@@ -71,9 +71,9 @@ class Particle {
   }
 
   reset(w, h) {
-    // Original face layout target coordinates
-    this.baseX = w * 0.5 + rand(-120, 120);
-    this.baseY = h * 0.4 + rand(-100, 100);
+    // Face layout target coordinates
+    this.baseX = w * 0.5 + rand(-180, 180);
+    this.baseY = h * 0.4 + rand(-120, 120);
     
     // Dispersed particle positioning
     this.x = this.baseX;
@@ -81,12 +81,12 @@ class Particle {
     
     this.vx = rand(-4, 4);
     this.vy = rand(-6, 2);
-    this.size = rand(1.5, 4);
+    this.size = rand(2, 5);
     
     // Minato theme colors (gold, yellow flash, chakra cyan)
     const palette = ['#FFD700', '#FFCC00', '#FFF8DC', '#00E5FF'];
     this.color = palette[Math.floor(Math.random() * palette.length)];
-    this.alpha = rand(0.3, 0.9);
+    this.alpha = rand(0.5, 0.95);
   }
 
   update(w, h, dispersionFactor) {
@@ -112,7 +112,7 @@ class Particle {
     ctx.globalAlpha = this.alpha * opacity;
     ctx.fillStyle = this.color;
     ctx.shadowColor = this.color;
-    ctx.shadowBlur = 8;
+    ctx.shadowBlur = 12;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
     ctx.fill();
@@ -127,7 +127,7 @@ initParticles();
 
 /* ──────────────── Sequence Stage Renderers ──────────────── */
 
-/* Stage 1: Closed Eyes Portrait */
+/* Stage 1: Closed Eyes Portrait (Enhanced visibility) */
 function drawPortrait(opacity) {
   if (opacity <= 0) return;
   const cx = bounds.width / 2;
@@ -136,21 +136,22 @@ function drawPortrait(opacity) {
   ctx.save();
   ctx.globalAlpha = opacity;
   ctx.strokeStyle = '#FFD700';
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 3;
   ctx.shadowColor = '#FFD700';
-  ctx.shadowBlur = 12;
+  ctx.shadowBlur = 18;
 
   // Closed eyes curves
   ctx.beginPath();
-  ctx.arc(cx - 35, cy, 18, Math.PI * 0.1, Math.PI * 0.9);
+  ctx.arc(cx - 45, cy, 22, Math.PI * 0.1, Math.PI * 0.9);
   ctx.stroke();
 
   ctx.beginPath();
-  ctx.arc(cx + 35, cy, 18, Math.PI * 0.1, Math.PI * 0.9);
+  ctx.arc(cx + 45, cy, 22, Math.PI * 0.1, Math.PI * 0.9);
   ctx.stroke();
 
   // Headband plate silhouette outline
-  ctx.strokeRect(cx - 65, cy - 50, 130, 28);
+  ctx.lineWidth = 2;
+  ctx.strokeRect(cx - 85, cy - 65, 170, 36);
   ctx.restore();
 }
 
@@ -164,7 +165,7 @@ function drawYellowFlash(opacity) {
   ctx.globalAlpha = opacity;
   
   // High-speed energetic light streaks
-  const streakCount = 12;
+  const streakCount = 15;
   for (let i = 0; i < streakCount; i++) {
     const y = (h / streakCount) * i + rand(-10, 10);
     const length = rand(w * 0.4, w * 0.9);
@@ -172,11 +173,11 @@ function drawYellowFlash(opacity) {
 
     const grad = ctx.createLinearGradient(x, y, x + length, y);
     grad.addColorStop(0, 'rgba(255, 215, 0, 0)');
-    grad.addColorStop(0.5, 'rgba(255, 255, 220, 0.8)');
+    grad.addColorStop(0.5, 'rgba(255, 255, 220, 0.9)');
     grad.addColorStop(1, 'rgba(255, 200, 0, 0)');
 
     ctx.fillStyle = grad;
-    ctx.fillRect(x, y, length, rand(2, 6));
+    ctx.fillRect(x, y, length, rand(3, 8));
   }
   ctx.restore();
 }
@@ -200,7 +201,7 @@ function drawRasengan(opacity) {
   // Render ghost cursor trail
   for (let i = 0; i < pointer.trail.length; i++) {
     const pt = pointer.trail[i];
-    const trailAlpha = (i / pointer.trail.length) * 0.3 * opacity;
+    const trailAlpha = (i / pointer.trail.length) * 0.4 * opacity;
     ctx.beginPath();
     ctx.arc(pt.x, pt.y, 25 * (i / pointer.trail.length), 0, Math.PI * 2);
     ctx.fillStyle = `rgba(0, 229, 255, ${trailAlpha})`;
@@ -210,21 +211,21 @@ function drawRasengan(opacity) {
   // Core spinning Chakra Orb
   const px = pointer.x;
   const py = pointer.y;
-  const radius = 42;
+  const radius = 45;
 
   // Ambient outer aura
-  const auraGrad = ctx.createRadialGradient(px, py, 5, px, py, radius * 2);
-  auraGrad.addColorStop(0, 'rgba(255, 255, 255, 0.9)');
-  auraGrad.addColorStop(0.4, 'rgba(0, 229, 255, 0.6)');
+  const auraGrad = ctx.createRadialGradient(px, py, 5, px, py, radius * 2.2);
+  auraGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+  auraGrad.addColorStop(0.4, 'rgba(0, 229, 255, 0.7)');
   auraGrad.addColorStop(1, 'rgba(0, 150, 255, 0)');
   ctx.fillStyle = auraGrad;
   ctx.beginPath();
-  ctx.arc(px, py, radius * 2, 0, Math.PI * 2);
+  ctx.arc(px, py, radius * 2.2, 0, Math.PI * 2);
   ctx.fill();
 
   // Spinning dynamic internal chakra rings
   rasenganAngle += 0.15;
-  ctx.lineWidth = 2;
+  ctx.lineWidth = 2.5;
   for (let i = 0; i < 4; i++) {
     ctx.save();
     ctx.translate(px, py);
@@ -249,7 +250,7 @@ function drawThunder(opacity) {
 
   if (isFlashing) {
     ctx.save();
-    ctx.globalAlpha = opacity * 0.25;
+    ctx.globalAlpha = opacity * 0.3;
     ctx.fillStyle = '#FFF8DC';
     ctx.fillRect(0, 0, bounds.width, bounds.height);
     ctx.restore();
@@ -262,20 +263,23 @@ function render() {
 
   const p = scrollProgress;
 
-  // Window envelopes for sequence transition points [a, b, c, d]
-  const opacityStage1 = window4(p, 0.00, 0.05, 0.18, 0.25); // Closed Eyes
-  const opacityStage2 = window4(p, 0.18, 0.28, 0.42, 0.50); // Particle Dissolve
-  const opacityStage3 = window4(p, 0.42, 0.52, 0.68, 0.75); // Yellow Dash Streak
+  // Adjusted Window Envelopes so Stage 1 is fully active at 0 scroll
+  const opacityStage1 = window4(p, 0.00, 0.00, 0.18, 0.28); // Closed Eyes
+  const opacityStage2 = window4(p, 0.18, 0.28, 0.42, 0.52); // Particle Dissolve
+  const opacityStage3 = window4(p, 0.42, 0.52, 0.68, 0.78); // Yellow Dash Streak
   const opacityStage4 = window4(p, 0.68, 0.78, 0.92, 1.00); // Rasengan Pointer
   const opacityStage5 = window4(p, 0.85, 0.92, 1.00, 1.00); // Thunder & Final Frame
 
+  // Force minimum 1.0 opacity on initial page load (0 scroll) for immediate visibility
+  const stage1Visibility = p === 0 ? 1.0 : opacityStage1;
+
   // Render sequence layers
-  drawPortrait(opacityStage1);
+  drawPortrait(stage1Visibility);
 
   // Update & draw particle engine
   particles.forEach(pt => {
     pt.update(bounds.width, bounds.height, opacityStage2);
-    pt.draw(ctx, opacityStage1 + opacityStage2);
+    pt.draw(ctx, p === 0 ? 0.9 : opacityStage1 + opacityStage2);
   });
 
   drawYellowFlash(opacityStage3);

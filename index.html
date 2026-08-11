@@ -1,83 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>波風ミナト — 黄色い閃光</title>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { width: 100%; background-color: #050505; color: white; font-family: sans-serif; }
-    
-    #minato-canvas {
-      display: block; width: 100vw; height: 100vh;
-      position: fixed; top: 0; left: 0; z-index: 10;
-    }
-    
-    /* Instruction text */
-    #hint {
-      position: fixed; bottom: 20px; width: 100%; text-align: center;
-      z-index: 20; opacity: 0.6; pointer-events: none;
-    }
-  </style>
-</head>
-<body>
-
-  <div id="hint">Scroll down to unleash the Rasengan</div>
-  <canvas id="minato-canvas"></canvas>
-  <div style="height: 400vh;"></div> <!-- Scroll space -->
-
+<html>
+<body style="margin:0; background:#050505; overflow:hidden;">
+  <canvas id="c"></canvas>
   <script>
-    // ... (All previous JavaScript code remains the same) ...
-    /* ───────────────────────── Helpers ───────────────────────── */
-    const lerp = (a, b, t) => a + (b - a) * t;
-    const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-    const rand = (a, b) => a + Math.random() * (b - a);
-    const window4 = (p, a, b, c, d) => p < a || p > d ? 0 : p < b ? (p - a) / (b - a) : p > c ? 1 - (p - c) / (d - c) : 1;
+    const c = document.getElementById('c');
+    const ctx = c.getContext('2d');
+    c.width = window.innerWidth;
+    c.height = window.innerHeight;
 
-    const canvas = document.getElementById('minato-canvas');
-    const ctx = canvas.getContext('2d');
-    let bounds = { width: window.innerWidth, height: window.innerHeight };
-    canvas.width = bounds.width; canvas.height = bounds.height;
-
-    let scrollProgress = 0;
-    window.addEventListener('scroll', () => {
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-      scrollProgress = maxScroll > 0 ? clamp(window.scrollY / maxScroll) : 0;
-      // Fade out hint when scrolling
-      document.getElementById('hint').style.opacity = Math.max(0, 1 - scrollProgress * 5);
-    });
-
-    /* Rasengan Logic (Stage 4) */
-    let rasenganAngle = 0;
-    function drawRasengan(opacity) {
-      if (opacity <= 0) return;
-      // Auto-move in center if no mouse movement
-      const px = window.innerWidth / 2;
-      const py = window.innerHeight / 2;
-      
-      // Draw spinning orb
-      rasenganAngle += 0.15;
-      ctx.save();
-      ctx.globalAlpha = opacity;
-      ctx.translate(px, py);
-      ctx.rotate(rasenganAngle);
-      ctx.strokeStyle = '#00E5FF';
-      ctx.lineWidth = 4;
-      ctx.beginPath();
-      ctx.arc(0, 0, 50, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.restore();
-    }
+    let frame = 0;
+    let rasenganRadius = 0;
 
     function render() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      const p = scrollProgress;
+      ctx.fillStyle = '#050505';
+      ctx.fillRect(0, 0, c.width, c.height);
+
+      const centerX = c.width / 2;
+      const centerY = c.height / 2;
+
+      // 1. Calculate Hand Positions
+      // Start at -200 and +200, move toward center (50 pixels apart)
+      let hand1Offset = Math.min(frame * 2, 150); 
+      let hand2Offset = Math.min(frame * 2, 150);
+
+      // 2. Draw "Arms" (Simple glowing lines)
+      ctx.strokeStyle = '#FFD700'; // Yellow flash color
+      ctx.lineWidth = 15;
+      ctx.lineCap = 'round';
       
-      // STAGE 4: Rasengan (appears when p > 0.7)
-      drawRasengan(window4(p, 0.7, 0.8, 1.0, 1.0));
-      
+      // Left Arm
+      ctx.beginPath();
+      ctx.moveTo(0, centerY + 100);
+      ctx.lineTo(centerX - 60 + hand1Offset, centerY);
+      ctx.stroke();
+
+      // Right Arm
+      ctx.beginPath();
+      ctx.moveTo(c.width, centerY + 100);
+      ctx.lineTo(centerX + 60 - hand2Offset, centerY);
+      ctx.stroke();
+
+      // 3. Create Rasengan when hands get close
+      if (frame > 75) {
+        if (rasenganRadius < 60) rasenganRadius += 0.8;
+        
+        // Glow effect
+        ctx.shadowBlur = 30;
+        ctx.shadowColor = '#00E5FF';
+        
+        // Spinning Rasengan
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(frame * 0.2);
+        ctx.strokeStyle = '#00E5FF';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.arc(0, 0, rasenganRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        
+        // Inner swirl
+        ctx.beginPath();
+        ctx.moveTo(-rasenganRadius*0.7, 0);
+        ctx.lineTo(rasenganRadius*0.7, 0);
+        ctx.stroke();
+        ctx.restore();
+        
+        ctx.shadowBlur = 0; // Reset glow
+      }
+
+      frame++;
       requestAnimationFrame(render);
     }
+
     render();
   </script>
 </body>
